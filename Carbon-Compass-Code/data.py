@@ -1,5 +1,4 @@
-#Carbon Compass: data.py
-#Stores emission factors, modifiers, and model assumptions.
+#Carbon Compass: Emission Factor Storage
 
 HOUSEHOLD_ALLOCATION_FACTOR = "divide_by_household_size"
 
@@ -58,6 +57,23 @@ FLIGHT_FACTORS_KG_PER_PASSENGER_KM = {
     "Long haul": 0.150
 }
 
+# NOTE: These used to be full annual diet baselines, which already assumed
+# an average amount of beef/lamb/dairy consumption for each diet type. That
+# meant beef/lamb and dairy were being counted once here AND again from the
+# frequency questions below, double-counting a big chunk of the food
+# footprint. These are now baselines for everything EXCEPT beef, lamb, and
+# dairy (grains, produce, pork, poultry, seafood, eggs, plant protein,
+# processed foods). Beef/lamb and dairy are always added on top from the
+# user's actual reported frequency, for every diet type.
+DIET_BASE_KG_PER_YEAR_EXCL_BEEF_LAMB_DAIRY = {
+    "Vegan": 504,
+    "Vegetarian": 550,
+    "Pescetarian": 700,
+    "Omnivore": 900,
+    "Heavy meat-eater": 1300
+}
+
+# Kept for reference/back-compat; no longer used directly in calculations.py
 DIET_FACTORS_KG_PER_YEAR = {
     "Vegan": 504,
     "Vegetarian": 894,

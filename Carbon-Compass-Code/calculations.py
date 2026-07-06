@@ -1,8 +1,8 @@
 from data import (
-    VEHICLE_FACTORS_KG_PER_MILE,
+    VEHICLE_FACTORS_KG_PER_KM,
     COMMUTE_FACTORS_KG_PER_KM,
     FLIGHT_FACTORS_KG_PER_PASSENGER_KM,
-    DIET_FACTORS_KG_PER_YEAR,
+    DIET_BASE_KG_PER_YEAR_EXCL_BEEF_LAMB_DAIRY,
     FREQUENCY_TO_SERVINGS_PER_WEEK,
     FOOD_FACTORS,
     FOOD_WASTE_LEVEL_KG_PER_WEEK,
@@ -24,13 +24,25 @@ def calculate_housing(answers):
     if answers["home_type"] == "Dormitory":
         return DORM_EMISSIONS_KG_PER_STUDENT_YEAR
 
-    home_energy = HOME_TYPE_ENERGY_MMBTU[answers["home_type"]]
+    home_energy_mmbtu = HOME_TYPE_ENERGY_MMBTU[answers["home_type"]]
     size_factor = HOME_SIZE_FACTORS[answers["home_size"]]
+    total_mmbtu = home_energy_mmbtu * size_factor
 
-    # Rough model: convert home type/size into a housing estimate.
-    # 1 MMBtu ≈ 293.071 kWh, then apply grid factor.
-    estimated_kwh = home_energy * 293.071 * size_factor
-    housing_emissions = estimated_kwh * HOUSING_FACTORS["electricity_kg_co2e_per_kwh"]
+    systems = answers["home_systems"]
+    housing_emissions = 0
+
+    if "Electricity" in systems:
+        electricity_kwh = total_mmbtu * 293.071 * 0.50
+        housing_emissions += electricity_kwh * HOUSING_FACTORS["electricity_kg_co2e_per_kwh"]
+
+    if "Heating" in systems:
+        heating_mmbtu = total_mmbtu * 0.35
+        heating_cubic_feet = heating_mmbtu * 970
+        housing_emissions += heating_cubic_feet * HOUSING_FACTORS["heating_kg_co2_per_cubic_foot_natural_gas"]
+
+    if "Air conditioning" in systems:
+        ac_kwh = total_mmbtu * 293.071 * 0.15
+        housing_emissions += ac_kwh * HOUSING_FACTORS["air_conditioning_kg_co2e_per_kwh"]
 
     return housing_emissions / household_size
 
@@ -40,13 +52,22 @@ def calculate_transportation(answers):
 
     weekly_distance = answers["weekly_vehicle_distance"]
 
+    if answers.get("vehicle_distance_unit") == "Miles":
+        weekly_distance_km = weekly_distance * 1.60934
+    else:
+        weekly_distance_km = weekly_distance
+
     if "None" not in answers["vehicle_types"]:
         for vehicle in answers["vehicle_types"]:
-            if vehicle in VEHICLE_FACTORS_KG_PER_MILE:
-                total += weekly_distance * VEHICLE_FACTORS_KG_PER_MILE[vehicle] * 52
+            if vehicle in VEHICLE_FACTORS_KG_PER_KM:
+                total += weekly_distance_km * VEHICLE_FACTORS_KG_PER_KM[vehicle] * 52
 
     commute_mode = answers["commute"]
     commute_distance_km = answers["commute_length"]
+
+    if answers["commute_unit"] == "Miles":
+        commute_distance_km *= 1.60934
+
     commute_days = answers["commute_frequency"]
 
     if commute_mode in COMMUTE_FACTORS_KG_PER_KM:
@@ -59,13 +80,13 @@ def calculate_transportation(answers):
 
 
 def calculate_food(answers):
-    total = DIET_FACTORS_KG_PER_YEAR[answers["diet"]]
+    total = DIET_BASE_KG_PER_YEAR_EXCL_BEEF_LAMB_DAIRY[answers["diet"]]
 
-    beef_lamb_servings = FREQUENCY_TO_SERVINGS_PER_WEEK[answers["beef_lamb_frequency"]]
+    beef_lamb_frequency = answers.get("beef_lamb_frequency", "Not applicable")
+    beef_lamb_servings = FREQUENCY_TO_SERVINGS_PER_WEEK.get(beef_lamb_frequency, 0)
     total += beef_lamb_servings * FOOD_FACTORS["beef_kg_co2e_per_125g_serving"] * 52
 
     dairy_servings = FREQUENCY_TO_SERVINGS_PER_WEEK[answers["dairy_frequency"]]
-    # Assume 1 dairy serving ≈ 0.25 kg.
     total += dairy_servings * 0.25 * FOOD_FACTORS["dairy_kg_co2e_per_kg"] * 52
 
     food_waste_kg_per_week = FOOD_WASTE_LEVEL_KG_PER_WEEK[answers["food_waste"]]
@@ -82,13 +103,12 @@ def calculate_waste(answers):
     total = total / household_size
 
     if answers["recycles"]:
-        total -= WASTE_FACTORS["recycling_kg_co2e_avoided_per_month"] * 12
+        total *= 0.75
 
     if answers["composts"]:
-        food_waste_kg_per_week = FOOD_WASTE_LEVEL_KG_PER_WEEK[answers["food_waste"]]
-        total -= food_waste_kg_per_week * WASTE_FACTORS["composting_kg_co2e_per_kg"] * 52
+        total *= 0.80
 
-    return max(total, 0)
+    return total
 
 
 def calculate_digital(answers):
@@ -124,7 +144,23 @@ def calculate_total(answers):
     digital = calculate_digital(answers)
     shopping = calculate_shopping(answers)
 
-    total = housing + transportation + food + waste + digital + shopping
+    total = (
+        housing
+        + transportation
+        + food
+        + waste
+        + digital
+        + shopping
+    )
+
+    percentages = {
+        "housing": round(housing / total * 100, 1),
+        "transportation": round(transportation / total * 100, 1),
+        "food": round(food / total * 100, 1),
+        "waste": round(waste / total * 100, 1),
+        "digital": round(digital / total * 100, 1),
+        "shopping": round(shopping / total * 100, 1),
+    }
 
     return {
         "housing": round(housing, 2),
@@ -134,4 +170,5 @@ def calculate_total(answers):
         "digital": round(digital, 2),
         "shopping": round(shopping, 2),
         "total": round(total, 2),
+        "percentages": percentages,
     }

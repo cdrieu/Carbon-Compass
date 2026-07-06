@@ -2,39 +2,86 @@
 
 def ask_number(question):
     """Ask the user for a number and return it as a float."""
-    return float(input(question + " "))
+    while True:
+        answer = input(question + " ").strip()
+        try:
+            return float(answer)
+        except ValueError:
+            print("Please enter a valid number.")
 
 
 def ask_choice(question, choices):
     """Ask the user to choose one option from a numbered list."""
-    print("\n" + question)
+    while True:
+        print("\n" + question)
 
-    for i, choice in enumerate(choices, start=1):
-        print(str(i) + ". " + choice)
+        for i, choice in enumerate(choices, start=1):
+            print(str(i) + ". " + choice)
 
-    answer = int(input("Enter a number: "))
-    return choices[answer - 1]
+        answer = input("Enter a number: ").strip()
+        if not answer:
+            print("Please enter a number.")
+            continue
+
+        try:
+            index = int(answer) - 1
+        except ValueError:
+            print("Please enter a valid number.")
+            continue
+
+        if 0 <= index < len(choices):
+            return choices[index]
+
+        print(f"Please enter a number from 1 to {len(choices)}.")
 
 
 def ask_multi_choice(question, choices):
     """Ask the user to choose multiple options from a numbered list."""
-    print("\n" + question)
-    print("Enter all that apply, separated by commas.")
+    while True:
+        print("\n" + question)
+        print("Enter all that apply, separated by commas.")
 
-    for i, choice in enumerate(choices, start=1):
-        print(str(i) + ". " + choice)
+        for i, choice in enumerate(choices, start=1):
+            print(str(i) + ". " + choice)
 
-    raw_answer = input("Enter numbers: ")
-    selected = []
+        raw_answer = input("Enter numbers: ").strip()
+        if not raw_answer:
+            print("Please enter at least one choice.")
+            continue
 
-    for number in raw_answer.split(","):
-        number = number.strip()
+        selected = []
+        invalid = False
 
-        if number != "":
-            index = int(number) - 1
-            selected.append(choices[index])
+        for number in raw_answer.split(","):
+            number = number.strip()
+            if number == "":
+                continue
 
-    return selected
+            try:
+                index = int(number) - 1
+            except ValueError:
+                print(f"'{number}' is not a valid number.")
+                invalid = True
+                break
+
+            if 0 <= index < len(choices):
+                selected.append(choices[index])
+            else:
+                print(f"Please enter numbers from 1 to {len(choices)}.")
+                invalid = True
+                break
+
+        if invalid:
+            continue
+
+        if not selected:
+            print("Please enter at least one valid choice.")
+            continue
+
+        if "None" in selected and len(selected) > 1:
+            selected = ["None"]
+
+        return selected
 
 
 def ask_slider_choice(question, choices):
@@ -44,10 +91,10 @@ def ask_slider_choice(question, choices):
 
 def ask_yes_no(question):
     """Ask a yes/no question."""
-    answer = input(question + " (yes/no) ").lower()
+    answer = input(question + " (yes/no) ").strip().lower()
 
-    while answer != "yes" and answer != "no":
-        answer = input("Please enter yes or no: ").lower()
+    while answer not in {"yes", "no"}:
+        answer = input("Please enter yes or no: ").strip().lower()
 
     return answer == "yes"
 
@@ -89,12 +136,18 @@ def collect_user_answers():
             "Approximately how many kilometers/miles do you drive each week?"
         )
 
+        answers["vehicle_distance_unit"] = ask_choice(
+            "Which unit are you using?",
+            ["Kilometers", "Miles"]
+        )
+
         answers["carpool"] = ask_slider_choice(
             "How often do you carpool?",
             ["Never", "Rarely", "Sometimes", "Often", "Always"]
         )
     else:
         answers["weekly_vehicle_distance"] = 0
+        answers["vehicle_distance_unit"] = "Kilometers"
         answers["carpool"] = "Not applicable"
 
     answers["commute"] = ask_choice(
@@ -103,9 +156,13 @@ def collect_user_answers():
     )
 
     answers["commute_length"] = ask_number(
-        "How far is your one-way commute?"
+        "Approximately how far is your one-way commute?"
     )
 
+    answers["commute_unit"] = ask_choice(
+        "Which unit are you using?",
+        ["Kilometers", "Miles"]
+    )
     answers["commute_frequency"] = ask_number(
         "How many days per week do you commute?"
     )
