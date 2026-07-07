@@ -1,55 +1,111 @@
-# Carbon Compass: Personalized Recommendations
+#Carbon Compass: Personalized Recommendations
 
-def generate_recommendations(answers, results):
+TRANSPORTATION_REDUCTION_FACTOR = 0.15
+FOOD_REDUCTION_FACTOR = 0.12
+HOUSING_REDUCTION_FACTOR = 0.10
+SHOPPING_REDUCTION_FACTOR = 0.20
+DIGITAL_REDUCTION_FACTOR = 0.10
+WASTE_RECYCLE_REDUCTION_FACTOR = 0.25
+WASTE_COMPOST_REDUCTION_FACTOR = 0.20
 
-    recommendations = []
 
-    percentages = results["percentages"]
+CATEGORY_MESSAGES = {
+    "transportation": (
+        "Transportation represents {percent}% of your footprint, and it is also one of the biggest hidden costs in everyday life. "
+        "Driving less, carpooling, using public transit, or cycling for shorter trips can cut fuel use while saving money. "
+        "Choosing trains when possible and combining trips can make a meaningful difference too."
+    ),
+    "food": (
+        "Food represents {percent}% of your footprint. Cutting back on beef, lamb, and dairy is one of the highest-leverage changes you can make. "
+        "You do not have to go all-in: swapping a few meals a week, choosing more plant-based proteins, or reducing dairy where it feels realistic can have a strong impact."
+    ),
+    "housing": (
+        "Housing contributes {percent}% of your footprint. Your home energy use is a major lever here, and it is one that pays you back directly: better insulation, "
+        "smarter thermostat habits, or a few degrees of adjustment on heating and cooling can significantly shrink your utility bills while cutting emissions."
+    ),
+    "shopping": (
+        "Shopping represents {percent}% of your footprint. Buying fewer new clothes and electronics, or choosing second-hand, cuts emissions substantially and tends to save money too."
+    ),
+    "digital": (
+        "Digital activities account for {percent}% of your footprint. Trimming excess streaming or AI usage is a simple way to lower energy use."
+    ),
+}
 
-    categories = sorted(
-        percentages.items(),
-        key=lambda item: item[1],
-        reverse=True
+
+def _calculate_percent_saved(results, kg_saved):
+    if results["total"] <= 0:
+        return 0.0
+    return round((kg_saved / results["total"]) * 100, 1)
+
+
+def _rank_categories(results):
+    return sorted(results["percentages"].items(), key=lambda item: item[1], reverse=True)
+
+
+def _build_waste_message(answers, percent):
+    message = (
+        f"Waste contributes {percent}% of your footprint. Continuing to reduce landfill waste through recycling and composting can make an additional difference. "
     )
 
-    for category, percent in categories[:3]:
+    if not answers.get("recycles", True):
+        message += "Recycling more household materials is a low-effort habit that keeps waste out of landfills. "
 
-        if category == "transportation":
-            recommendations.append(
-                f"Transportation represents {percent}% of your footprint, and it's also probably your biggest hidden expense. Carpooling or public transit can save you real money on gas and parking, cycling for short trips doubles as free cardio, and cutting a few unnecessary drives a week gives you back time you'd otherwise spend behind the wheel."
-            )
+    if not answers.get("composts", True):
+        message += "Composting food scraps prevents methane emissions from landfills."
 
-        elif category == "food":
-            recommendations.append(
-                f"Food represents {percent}% of your footprint. Cutting back on beef and lamb is one of the highest-leverage changes you can make for your footprint, and it tends to come with lower grocery bills and a lighter, less inflammatory diet as a side effect. You don't necessarily have to go all-in, even swapping two or three meals a week can add up."
-            )
+    return message.strip()
 
-        elif category == "housing":
-            recommendations.append(
-                f"Housing contributes {percent}% of your footprint. Your home energy use is a major lever here, and it's one that pays you back directly: better insulation, smarter thermostat habits, or just a few degrees of adjustment on heating and cooling can meaningfully shrink your utility bills while cutting emissions."
-            )
 
-        elif category == "shopping":
-            recommendations.append(
-                f"Shopping represents {percent}% of your footprint. Buying fewer new clothes and electronics, or choosing second-hand, cuts emissions substantially and tends to save serious money too. It's also a good nudge toward a less cluttered, more intentional relationship with what you own."
-            )
+def _estimate_savings(category, answers, results):
+    if category == "transportation":
+        kg_saved = results["transportation"] * TRANSPORTATION_REDUCTION_FACTOR
+    elif category == "food":
+        kg_saved = results["food"] * FOOD_REDUCTION_FACTOR
+    elif category == "housing":
+        kg_saved = results["housing"] * HOUSING_REDUCTION_FACTOR
+    elif category == "shopping":
+        kg_saved = results["shopping"] * SHOPPING_REDUCTION_FACTOR
+    elif category == "digital":
+        kg_saved = results["digital"] * DIGITAL_REDUCTION_FACTOR
+    elif category == "waste":
+        kg_saved = 0.0
+        if not answers.get("recycles", True):
+            kg_saved += results["waste"] * WASTE_RECYCLE_REDUCTION_FACTOR
+        if not answers.get("composts", True):
+            kg_saved += results["waste"] * WASTE_COMPOST_REDUCTION_FACTOR
+    else:
+        return None
 
-        elif category == "digital":
-            recommendations.append(
-                f"Digital activities account for {percent}% of your footprint. Trimming excess streaming or AI usage barely dents your day-to-day experience, but it's a quiet way to reclaim a little screen time and lower your energy use at the same time."
-            )
+    if kg_saved <= 0:
+        return None
 
-        elif category == "waste":
-            recommendation = (
-                f"Waste contributes {percent}% of your footprint. Continuing to reduce landfill waste through recycling and composting can make an additional difference. "
-            )
+    return round(kg_saved, 2), _calculate_percent_saved(results, kg_saved)
 
-            if not answers["recycles"]:
-                recommendation += "Recycling more of your household materials is a low-effort habit that keeps waste out of landfills, and it's one of the easiest ways to feel like your daily choices are actually adding up to something. "
 
-            if not answers["composts"]:
-                recommendation += "Composting food scraps prevents methane emissions from landfills, and if you garden or keep houseplants, it also hands you free, nutrient-rich soil instead of paying for it at the store."
+def generate_recommendations(answers, results, top_n=3):
+    recommendations = []
 
-            recommendations.append(recommendation.strip())
+    for category, percent in _rank_categories(results):
+        if len(recommendations) >= top_n:
+            break
+
+        if category == "waste":
+            if answers.get("recycles", True) and answers.get("composts", True):
+                continue
+            message = _build_waste_message(answers, percent)
+        elif category in CATEGORY_MESSAGES:
+            message = CATEGORY_MESSAGES[category].format(percent=percent)
+        else:
+            continue
+
+        savings = _estimate_savings(category, answers, results)
+
+        recommendations.append({
+            "category": category,
+            "percent_of_footprint": percent,
+            "message": message,
+            "kg_saved": savings[0] if savings else None,
+            "percent_saved": savings[1] if savings else None,
+        })
 
     return recommendations
