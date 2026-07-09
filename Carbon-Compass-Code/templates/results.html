@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carbon Compass Results</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+<main>
+    <section class="card results-hero">
+        <p class="eyebrow">Your Carbon Compass</p>
+        <h1>{{ total_tonnes }}</h1>
+        <p><strong>{{ unit_label }}</strong></p>
+        <p>{{ unit_note }}</p>
+        <div class="rating-pill">Footprint rating: {{ rating }}</div>
+    </section>
+
+    <section class="panel">
+        <h2>Carbon Composition</h2>
+
+        <ul>
+            <li>Housing: {{ (results.housing / 1000) | round(2) }} {{ unit_label }}</li>
+            <li>Transportation: {{ (results.transportation / 1000) | round(2) }} {{ unit_label }}</li>
+            <li>Food: {{ (results.food / 1000) | round(2) }} {{ unit_label }}</li>
+            <li>Waste: {{ (results.waste / 1000) | round(2) }} {{ unit_label }}</li>
+            <li>Digital: {{ (results.digital / 1000) | round(2) }} {{ unit_label }}</li>
+            <li>Shopping: {{ (results.shopping / 1000) | round(2) }} {{ unit_label }}</li>
+        </ul>
+    </section>
+
+    <section class="panel">
+        <h2>Footprint Breakdown</h2>
+
+        <ol>
+            {% for category, percent in ranked_categories %}
+            <li>{{ category.capitalize() }}: {{ percent }}%</li>
+            {% endfor %}
+        </ol>
+    </section>
+
+    <section class="panel">
+        <h2>Personalized Recommendations</h2>
+
+        <div class="recommendation-list">
+            {% for recommendation in recommendations %}
+            <article class="recommendation-card">
+                <h3>{{ recommendation.category.capitalize() }}</h3>
+                <p>{{ recommendation.message }}</p>
+
+                {% if recommendation.kg_saved is not none %}
+                <p>
+                    <strong>Estimated savings:</strong>
+                    {{ (recommendation.kg_saved / 1000) | round(2) }}
+                    {{ unit_label }}
+                    ({{ recommendation.percent_saved }}% of your total footprint)
+                </p>
+                {% endif %}
+            </article>
+            {% endfor %}
+        </div>
+    </section>
+
+    <p>
+        <a class="button" href="{{ url_for('quiz') }}">Retake Assessment</a>
+    </p>
+</main>
+</body>
+</html>

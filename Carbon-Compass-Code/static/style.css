@@ -1,0 +1,218 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: #f7f8f3;
+    color: #1f2d24;
+}
+
+main {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 2rem 1.25rem 4rem;
+}
+
+.hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    gap: 1rem;
+}
+
+.card,
+.panel {
+    background: white;
+    border: 1px solid #dfdfdf;
+    border-radius: 16px;
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.button {
+    display: inline-block;
+    background: #234d3f;
+    color: white;
+    padding: 0.8rem 1.2rem;
+    text-decoration: none;
+    border-radius: 999px;
+    border: none;
+    cursor: pointer;
+    margin-top: 0.5rem;
+}
+
+.button.secondary {
+    background: #e8ece7;
+    color: #1f2d24;
+}
+
+form {
+    display: grid;
+    gap: 1rem;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-weight: 600;
+}
+
+input,
+select,
+textarea {
+    width: 100%;
+    padding: 0.6rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-sizing: border-box;
+}
+
+.checkbox-list {
+    display: grid;
+    gap: 0.35rem;
+    margin-top: 0.35rem;
+}
+
+.checkbox-list label,
+.choice-card {
+    font-weight: 400;
+}
+
+.choice-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.75rem;
+    margin: 0.5rem 0 1rem;
+}
+
+.choice-card {
+    border: 1px solid #d7ddd4;
+    border-radius: 10px;
+    padding: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #f8faf7;
+}
+
+.choice-card input {
+    width: auto;
+}
+
+.inline-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.inline-options label {
+    font-weight: 400;
+}
+
+.nav-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: #e4e8e1;
+    border-radius: 999px;
+    overflow: hidden;
+    margin: 1rem 0 0.4rem;
+}
+
+.progress-fill {
+    height: 100%;
+    width: 16.7%;
+    background: #234d3f;
+    transition: width 0.2s ease;
+}
+
+.step-text {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #647068;
+}
+
+.slider-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 0.3rem 0 0.8rem;
+}
+
+.slider-row input[type="range"] {
+    flex: 1;
+}
+
+.summary {
+    font-size: 1.1rem;
+    line-height: 1.6;
+}
+
+.big-number {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0.3rem 0;
+}
+
+.quiz-step {
+    display: none;
+}
+
+.quiz-step.active {
+    display: block;
+}
+
+.hidden {
+    display: none;
+}
+
+ul, ol {
+    padding-left: 1.2rem;
+}
+
+.eyebrow {
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    font-size: 0.8rem;
+    color: #6e7b72;
+}
+
+.results-hero h1 {
+    font-size: 2.6rem;
+    margin: 0.3rem 0;
+}
+
+.results-hero h1 span {
+    display: block;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.rating-pill {
+    display: inline-block;
+    margin-top: 0.75rem;
+    padding: 0.45rem 0.8rem;
+    border-radius: 999px;
+    background: #edf4ed;
+    color: #234d3f;
+}
+
+.recommendation-list {
+    display: grid;
+    gap: 0.75rem;
+}
+
+.recommendation-card {
+    border: 1px solid #e1e7df;
+    border-radius: 12px;
+    padding: 0.9rem 1rem;
+    background: #fbfcfa;
+}

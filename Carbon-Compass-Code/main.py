@@ -29,7 +29,7 @@ def print_results(results):
     total_tonnes = round(results["total"] / 1000, 2)
     rating = get_footprint_rating(total_tonnes)
 
-    print("\nYour Carbon Compass Results")
+    print("\nYour Carbon Compass")
     print("---------------------------")
     print(EMISSION_UNIT_NOTE)
     print("Housing: " + str(round(results["housing"] / 1000, 2)) + " " + EMISSION_UNIT_LABEL)
@@ -44,7 +44,7 @@ def print_results(results):
 
 
 def print_rankings(results):
-    print("\nBiggest Contributors")
+    print("\nFootprint Fractions")
     print("--------------------")
 
     for category, percent in get_ranked_categories(results):
@@ -58,7 +58,7 @@ def print_recommendations(recommendations):
     total_saved_percent = 0
 
     for i, rec in enumerate(recommendations, start=1):
-        print(f"\n{i}. {rec['category'].title()} — {rec['percent_of_footprint']}% of your footprint")
+        print(f"\n{i}. {rec['category'].title()} {rec['percent_of_footprint']}% of your footprint")
         print(rec["message"])
 
         if rec["kg_saved"] is not None:
@@ -70,7 +70,7 @@ def print_recommendations(recommendations):
 
     if total_saved_percent > 0:
         print(
-            "\nTogether, these recommendations could reduce your footprint by approximately "
+            "\nIf you follow in these footsteps, you could reduce your carbon emissions by approximately "
             + str(round(total_saved_percent, 1))
             + "% if consistently adopted."
         )

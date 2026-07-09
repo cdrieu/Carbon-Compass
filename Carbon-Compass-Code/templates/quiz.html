@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carbon Compass Quiz</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+<main>
+    <section class="card intro-card">
+        <h1>Carbon Compass Assessment</h1>
+        <p>Answer the questions below to estimate your annual carbon footprint.</p>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+
+        <p class="step-text" id="stepText">Step 1 of 6</p>
+    </section>
+
+    <form id="carbonForm" method="post" action="{{ url_for('quiz') }}" autocomplete="off">
+
+        <section class="panel quiz-step active">
+            <h2>Housing</h2>
+
+            <label for="country">Country</label>
+            <select id="country" name="country" required>
+                <option value="" selected disabled>Select your country</option>
+                {% for country in countries %}
+                    <option value="{{ country }}">{{ country }}</option>
+                {% endfor %}
+            </select>
+
+            <label for="state">State / Province</label>
+            <input
+                type="text"
+                id="state"
+                name="state"
+                placeholder="Type your state or province"
+                autocomplete="off"
+            >
+
+            <label for="household_size">How many people live in your household?</label>
+            <input
+                type="number"
+                id="household_size"
+                name="household_size"
+                min="1"
+                value="1"
+                required
+            >
+
+            <label for="home_type">What type of home do you live in?</label>
+            <select id="home_type" name="home_type" required>
+                <option value="Apartment">Apartment</option>
+                <option value="Townhouse">Townhouse</option>
+                <option value="Detached house">Detached house</option>
+                <option value="Dormitory">Dormitory</option>
+                <option value="Other">Other</option>
+            </select>
+
+            <label for="home_size">Approximately how large is your home?</label>
+            <select id="home_size" name="home_size" required>
+                <option value="Small">Small</option>
+                <option value="Medium">Medium</option>
+                <option value="Large">Large</option>
+                <option value="Very large">Very large</option>
+            </select>
+
+            <label>Which of these does your home use?</label>
+            <div class="checkbox-list">
+                <label>
+                    <input type="checkbox" name="home_systems" value="Electricity">
+                    Electricity
+                </label>
+
+                <label>
+                    <input type="checkbox" name="home_systems" value="Heating">
+                    Heating
+                </label>
+
+                <label>
+                    <input type="checkbox" name="home_systems" value="Air conditioning">
+                    Air conditioning
+                </label>
+            </div>
+        </section>
+
+        <section class="panel quiz-step">
+            <h2>Transportation</h2>
+
+            <label>Which motor vehicles do you regularly use?</label>
+            <div class="checkbox-list">
+                <label>
+                    <input type="checkbox" name="vehicle_types" value="Gasoline car">
+                    Gasoline car
+                </label>
+
+                <label>
+                    <input type="checkbox" name="vehicle_types" value="Hybrid vehicle">
+                    Hybrid vehicle
+                </label>
+
+                <label>
+                    <input type="checkbox" name="vehicle_types" value="Electric car">
+                    Electric car
+                </label>
+
+                <label>
+                    <input type="checkbox" name="vehicle_types" value="Motorcycle">
+                    Motorcycle
+                </label>
+
+                <label>
+                    <input type="checkbox" name="vehicle_types" value="None" checked>
+                    None
+                </label>
+            </div>
+
+            <div id="vehicle-questions" class="hidden">
+                <label for="weeklyVehicleDistanceSlider">
+                    Approximately how many kilometers or miles do you drive each week?
+                </label>
+
+                <div class="slider-row">
+                    <input
+                        type="range"
+                        min="0"
+                        max="1000"
+                        step="10"
+                        value="0"
+                        id="weeklyVehicleDistanceSlider"
+                    >
+                    <span id="weeklyVehicleDistanceValue">0 km</span>
+                </div>
+
+                <input
+                    type="hidden"
+                    name="weekly_vehicle_distance"
+                    id="weeklyVehicleDistance"
+                    value="0"
+                >
+
+                <label for="vehicle_distance_unit">Which unit are you using?</label>
+                <select id="vehicle_distance_unit" name="vehicle_distance_unit">
+                    <option value="Kilometers">Kilometers</option>
+                    <option value="Miles">Miles</option>
+                </select>
+
+                <label for="carpool">How often do you carpool?</label>
+                <select id="carpool" name="carpool">
+                    <option value="Never">Never</option>
+                    <option value="Rarely">Rarely</option>
+                    <option value="Sometimes">Sometimes</option>
+                    <option value="Often">Often</option>
+                    <option value="Always">Always</option>
+                </select>
+            </div>
+
+            <label for="commute">How do you usually commute?</label>
+            <select id="commute" name="commute" required>
+                <option value="Car">Car</option>
+                <option value="Bus">Bus</option>
+                <option value="Train">Train</option>
+                <option value="Bicycle">Bicycle</option>
+                <option value="Walk">Walk</option>
+                <option value="Work from home">Work from home</option>
+                <option value="Other">Other</option>
+            </select>
+
+            <label for="commuteLengthSlider">
+                Approximately how far is your one-way commute?
+            </label>
+
+            <div class="slider-row">
+                <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    step="1"
+                    value="0"
+                    id="commuteLengthSlider"
+                >
+                <span id="commuteLengthValue">0 km</span>
+            </div>
+
+            <input
+                type="hidden"
+                name="commute_length"
+                id="commuteLength"
+                value="0"
+            >
+
+            <label for="commute_unit">Which unit are you using?</label>
+            <select id="commute_unit" name="commute_unit">
+                <option value="Kilometers">Kilometers</option>
+                <option value="Miles">Miles</option>
+            </select>
+
+            <label for="commuteFrequencySlider">
+                How many days per week do you commute?
+            </label>
+
+            <div class="slider-row">
+                <input
+                    type="range"
+                    min="0"
+                    max="7"
+                    step="1"
+                    value="0"
+                    id="commuteFrequencySlider"
+                >
+                <span id="commuteFrequencyValue">0 days/week</span>
+            </div>
+
+            <input
+                type="hidden"
+                name="commute_frequency"
+                id="commuteFrequency"
+                value="0"
+            >
+
+            <label for="domestic_flights">
+                How many domestic flights do you take each year on average?
+            </label>
+            <input
+                type="number"
+                id="domestic_flights"
+                name="domestic_flights"
+                min="0"
+                value="0"
+            >
+
+            <label for="international_flights">
+                How many international flights do you take each year on average?
+            </label>
+            <input
+                type="number"
+                id="international_flights"
+                name="international_flights"
+                min="0"
+                value="0"
+            >
+        </section>
+
+        <section class="panel quiz-step">
+            <h2>Food</h2>
+
+            <label for="dietSelect">Which best describes your diet?</label>
+            <select id="dietSelect" name="diet">
+                <option value="Vegan">Vegan</option>
+                <option value="Vegetarian">Vegetarian</option>
+                <option value="Pescetarian">Pescetarian</option>
+                <option value="Omnivore">Omnivore</option>
+                <option value="Heavy meat-eater">Heavy meat-eater</option>
+            </select>
+
+            <div id="beef-lamb-question">
+                <label for="beef_lamb_frequency">
+                    How often do you eat beef or lamb?
+                </label>
+
+                <select id="beef_lamb_frequency" name="beef_lamb_frequency">
+                    <option value="Never">Never</option>
+                    <option value="Rarely">Rarely</option>
+                    <option value="Weekly">Weekly</option>
+                    <option value="Several times per week">Several times per week</option>
+                    <option value="Daily">Daily</option>
+                </select>
+            </div>
+
+            <label for="dairy_frequency">How often do you consume dairy?</label>
+            <select id="dairy_frequency" name="dairy_frequency">
+                <option value="Never">Never</option>
+                <option value="Rarely">Rarely</option>
+                <option value="Weekly">Weekly</option>
+                <option value="Several times per week">Several times per week</option>
+                <option value="Daily">Daily</option>
+            </select>
+
+            <label for="food_waste">How much food do you typically throw away?</label>
+            <select id="food_waste" name="food_waste">
+                <option value="None">None</option>
+                <option value="A little">A little</option>
+                <option value="Some">Some</option>
+                <option value="A lot">A lot</option>
+            </select>
+        </section>
+
+        <section class="panel quiz-step">
+            <h2>Waste</h2>
+
+            <label for="recycles">Do you recycle?</label>
+            <select id="recycles" name="recycles">
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+            </select>
+
+            <label for="composts">Do you compost?</label>
+            <select id="composts" name="composts">
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+            </select>
+
+            <label for="trash_bags_per_week">
+                How many trash bags does your household fill per week?
+            </label>
+            <input
+                type="number"
+                id="trash_bags_per_week"
+                name="trash_bags_per_week"
+                min="0"
+                value="0"
+            >
+        </section>
+
+        <section class="panel quiz-step">
+            <h2>Digital</h2>
+
+            <label for="streamingSlider">
+                How many hours per day do you stream video or music?
+            </label>
+
+            <div class="slider-row">
+                <input
+                    type="range"
+                    min="0"
+                    max="12"
+                    step="0.5"
+                    value="0"
+                    id="streamingSlider"
+                >
+                <span id="streamingValue">0 hours/day</span>
+            </div>
+
+            <input
+                type="hidden"
+                name="streaming_hours_per_day"
+                id="streamingHours"
+                value="0"
+            >
+
+            <label for="ai_usage">How often do you use AI tools?</label>
+            <select id="ai_usage" name="ai_usage">
+                <option value="Never">Never</option>
+                <option value="Rarely">Rarely</option>
+                <option value="Weekly">Weekly</option>
+                <option value="Daily">Daily</option>
+            </select>
+
+            <label for="videoCallSlider">
+                How many hours do you spend on video calls each week?
+            </label>
+
+            <div class="slider-row">
+                <input
+                    type="range"
+                    min="0"
+                    max="40"
+                    step="1"
+                    value="0"
+                    id="videoCallSlider"
+                >
+                <span id="videoCallValue">0 hours/week</span>
+            </div>
+
+            <input
+                type="hidden"
+                name="video_call_hours_per_week"
+                id="videoCallHours"
+                value="0"
+            >
+        </section>
+
+        <section class="panel quiz-step">
+            <h2>Shopping</h2>
+
+            <label for="new_clothing_frequency">
+                How often do you buy new clothing?
+            </label>
+            <select id="new_clothing_frequency" name="new_clothing_frequency">
+                <option value="Rarely">Rarely</option>
+                <option value="Sometimes">Sometimes</option>
+                <option value="Often">Often</option>
+                <option value="Frequently">Frequently</option>
+            </select>
+
+            <label for="new_electronics_frequency">
+                How often do you buy new electronics?
+            </label>
+            <select id="new_electronics_frequency" name="new_electronics_frequency">
+                <option value="Rarely">Rarely</option>
+                <option value="Sometimes">Sometimes</option>
+                <option value="Often">Often</option>
+                <option value="Frequently">Frequently</option>
+            </select>
+        </section>
+
+        <div class="nav-row">
+            <button class="button secondary" type="button" id="prevBtn">
+                Previous
+            </button>
+
+            <button class="button" type="button" id="nextBtn">
+                Next
+            </button>
+
+            <button class="button" type="submit" id="submitBtn">
+                Calculate My Footprint
+            </button>
+        </div>
+    </form>
+</main>
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
