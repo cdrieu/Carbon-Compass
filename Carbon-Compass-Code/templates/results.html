@@ -2,69 +2,235 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Carbon Compass Results</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Your Carbon Compass</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cedarville+Cursive&family=Cormorant+Garamond:wght@500;600;700&family=Instrument+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
 </head>
 
-<body>
-<main>
-    <section class="card results-hero">
-        <p class="eyebrow">Your Carbon Compass</p>
-        <h1>{{ total_tonnes }}</h1>
-        <p><strong>{{ unit_label }}</strong></p>
-        <p>{{ unit_note }}</p>
-        <div class="rating-pill">Footprint rating: {{ rating }}</div>
-    </section>
+<body class="results-page">
 
-    <section class="panel">
-        <h2>Carbon Composition</h2>
+<main class="results-main">
 
-        <ul>
-            <li>Housing: {{ (results.housing / 1000) | round(2) }} {{ unit_label }}</li>
-            <li>Transportation: {{ (results.transportation / 1000) | round(2) }} {{ unit_label }}</li>
-            <li>Food: {{ (results.food / 1000) | round(2) }} {{ unit_label }}</li>
-            <li>Waste: {{ (results.waste / 1000) | round(2) }} {{ unit_label }}</li>
-            <li>Digital: {{ (results.digital / 1000) | round(2) }} {{ unit_label }}</li>
-            <li>Shopping: {{ (results.shopping / 1000) | round(2) }} {{ unit_label }}</li>
-        </ul>
-    </section>
+    <header class="results-header">
+        <a class="quiz-logo" href="{{ url_for('home') }}">
+            Carbon Compass
+        </a>
+    </header>
 
-    <section class="panel">
-        <h2>Footprint Breakdown</h2>
+    <section class="results-report">
 
-        <ol>
-            {% for category, percent in ranked_categories %}
-            <li>{{ category.capitalize() }}: {{ percent }}%</li>
-            {% endfor %}
-        </ol>
-    </section>
+        <div class="results-summary">
+            <p class="eyebrow">Your annual carbon footprint</p>
 
-    <section class="panel">
-        <h2>Personalized Recommendations</h2>
+            <h1>{{ total_tonnes }}</h1>
 
-        <div class="recommendation-list">
-            {% for recommendation in recommendations %}
-            <article class="recommendation-card">
-                <h3>{{ recommendation.category.capitalize() }}</h3>
-                <p>{{ recommendation.message }}</p>
+            <p class="results-unit">
+                {{ unit_label }}
+            </p>
 
-                {% if recommendation.kg_saved is not none %}
-                <p>
-                    <strong>Estimated savings:</strong>
-                    {{ (recommendation.kg_saved / 1000) | round(2) }}
-                    {{ unit_label }}
-                    ({{ recommendation.percent_saved }}% of your total footprint)
-                </p>
-                {% endif %}
-            </article>
-            {% endfor %}
+            <p class="unit-note">
+                {{ unit_note }}
+            </p>
+
+            <div class="rating-pill">
+                Footprint rating: {{ rating }}
+            </div>
         </div>
+
+        <div class="composition-section">
+            <div class="composition-heading">
+                <h2>Carbon Composition</h2>
+
+                <p>
+                    Hover over each section to see how much it contributes
+                    to your annual footprint.
+                </p>
+            </div>
+
+            <div class="composition-layout">
+
+                <div class="chart-container">
+                    <canvas id="footprintChart"></canvas>
+                </div>
+
+                <div class="composition-legend">
+                    {% for category, percent in ranked_categories %}
+                    <div class="legend-item">
+                        <span
+                            class="legend-color legend-color-{{ category }}"
+                            aria-hidden="true"
+                        ></span>
+
+                        <span class="legend-name">
+                            {{ category.capitalize() }}
+                        </span>
+
+                        <strong class="legend-percent">
+                            {{ percent }}%
+                        </strong>
+                    </div>
+                    {% endfor %}
+                </div>
+
+            </div>
+        </div>
+
+        <div class="recommendations-section">
+            <div class="recommendations-heading">
+                <h2>Recommendations</h2>
+
+                <p>
+                    Your footprint is a map, not a grade. Here are the
+                    changes that can help you protect the planet and ameliorate your life.
+                </p>
+            </div>
+
+            <div
+                class="recommendation-carousel"
+                id="recommendationCarousel"
+            >
+                {% for recommendation in recommendations %}
+                <article
+                    class="recommendation-slide{% if loop.first %} active{% endif %}"
+                >
+                    <div class="recommendation-layout">
+
+                        {% if recommendation.kg_saved is not none %}
+                        <div class="recommendation-savings">
+
+                            <p class="savings-label">
+                                Potential annual savings
+                            </p>
+
+                            <p class="savings-number">
+                                {{ recommendation.kg_saved | round(0) | int }}
+                            </p>
+
+                            <p class="savings-unit">
+                                kg CO<sub>2</sub>e
+                            </p>
+
+                            <p class="savings-percentage">
+                                Approximately {{ recommendation.percent_saved }}%
+                                of your total footprint
+                            </p>
+
+                        </div>
+                        {% endif %}
+
+                        <div class="recommendation-copy">
+
+                            <h3>
+                                {{ recommendation.category.capitalize() }}
+                            </h3>
+
+                            <p class="recommendation-message">
+                                {{ recommendation.message }}
+                            </p>
+
+                        </div>
+
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+
+            {% if recommendations|length > 1 %}
+            <div class="carousel-controls">
+
+                <button
+                    class="carousel-arrow"
+                    id="previousRecommendation"
+                    type="button"
+                    aria-label="Previous recommendation"
+                >
+                    ←
+                </button>
+
+                <div class="carousel-dots">
+                    {% for recommendation in recommendations %}
+                    <button
+                        class="recommendation-dot{% if loop.first %} active{% endif %}"
+                        type="button"
+                        aria-label="View recommendation {{ loop.index }}"
+                    ></button>
+                    {% endfor %}
+                </div>
+
+                <button
+                    class="carousel-arrow"
+                    id="nextRecommendation"
+                    type="button"
+                    aria-label="Next recommendation"
+                >
+                    →
+                </button>
+
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="results-closing">
+            <p>
+                A healthy planet is a healthy you.
+            </p>
+
+            <a
+                class="button secondary"
+                href="{{ url_for('quiz') }}"
+            >
+                Recalculate My Footprint
+            </a>
+        </div>
+
     </section>
 
-    <p>
-        <a class="button" href="{{ url_for('quiz') }}">Retake Assessment</a>
-    </p>
 </main>
+
+<script>
+    window.footprintChartData = {
+        labels: [
+            "Housing",
+            "Transportation",
+            "Food",
+            "Waste",
+            "Digital",
+            "Shopping"
+        ],
+
+        values: [
+            {{ results.housing | tojson }},
+            {{ results.transportation | tojson }},
+            {{ results.food | tojson }},
+            {{ results.waste | tojson }},
+            {{ results.digital | tojson }},
+            {{ results.shopping | tojson }}
+        ]
+    };
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script
+    src="{{ url_for('static', filename='results.js') }}"
+></script>
+
 </body>
 </html>

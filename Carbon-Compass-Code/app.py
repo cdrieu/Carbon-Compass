@@ -44,47 +44,143 @@ def coerce_float(value, default=0.0):
 
 def build_answers(form):
     vehicle_types = form.getlist("vehicle_types")
+
     if not vehicle_types or "None" in vehicle_types:
         vehicle_types = ["None"]
 
+    distance_unit = form.get("distance_unit", "Kilometers")
     diet = form.get("diet", "Omnivore")
+
+    if "None" in vehicle_types:
+        weekly_vehicle_distance = 0
+        carpool = "Not applicable"
+    else:
+        weekly_vehicle_distance = coerce_float(
+            form.get("weekly_vehicle_distance"),
+            0
+        )
+        carpool = form.get("carpool", "Never")
 
     return {
         "country": form.get("country", ""),
         "state": form.get("state", ""),
-        "household_size": coerce_float(form.get("household_size"), 1),
-        "home_type": form.get("home_type", "Apartment"),
-        "home_size": form.get("home_size", "Medium"),
-        "home_systems": form.getlist("home_systems") or ["Electricity"],
+
+        "household_size": coerce_float(
+            form.get("household_size"),
+            1
+        ),
+
+        "home_type": form.get(
+            "home_type",
+            "Apartment"
+        ),
+
+        "home_size": form.get(
+            "home_size",
+            "Medium"
+        ),
+
+        "home_systems": (
+            form.getlist("home_systems")
+            or ["Electricity"]
+        ),
 
         "vehicle_types": vehicle_types,
-        "weekly_vehicle_distance": 0 if "None" in vehicle_types else coerce_float(form.get("weekly_vehicle_distance"), 0),
-        "vehicle_distance_unit": "Kilometers" if "None" in vehicle_types else form.get("vehicle_distance_unit", "Kilometers"),
-        "carpool": "Not applicable" if "None" in vehicle_types else form.get("carpool", "Never"),
 
-        "commute": form.get("commute", "Work from home"),
-        "commute_length": coerce_float(form.get("commute_length"), 0),
-        "commute_unit": form.get("commute_unit", "Kilometers"),
-        "commute_frequency": coerce_float(form.get("commute_frequency"), 0),
+        "weekly_vehicle_distance": weekly_vehicle_distance,
 
-        "domestic_flights": coerce_float(form.get("domestic_flights"), 0),
-        "international_flights": coerce_float(form.get("international_flights"), 0),
+        "vehicle_distance_unit": distance_unit,
+
+        "carpool": carpool,
+
+        "commute": form.get(
+            "commute",
+            "Work from home"
+        ),
+
+        "commute_length": coerce_float(
+            form.get("commute_length"),
+            0
+        ),
+
+        "commute_unit": distance_unit,
+
+        "commute_frequency": coerce_float(
+            form.get("commute_frequency"),
+            0
+        ),
+
+        "domestic_flights": coerce_float(
+            form.get("domestic_flights"),
+            0
+        ),
+
+        "international_flights": coerce_float(
+            form.get("international_flights"),
+            0
+        ),
 
         "diet": diet,
-        "beef_lamb_frequency": form.get("beef_lamb_frequency", "Weekly") if diet in ["Omnivore", "Heavy meat-eater"] else "Not applicable",
-        "dairy_frequency": form.get("dairy_frequency", "Weekly"),
-        "food_waste": form.get("food_waste", "Some"),
 
-        "recycles": form.get("recycles", "no") == "yes",
-        "composts": form.get("composts", "no") == "yes",
-        "trash_bags_per_week": coerce_float(form.get("trash_bags_per_week"), 0),
+        "beef_lamb_frequency": (
+            form.get(
+                "beef_lamb_frequency",
+                "Weekly"
+            )
+            if diet in {
+                "Omnivore",
+                "Heavy meat-eater"
+            }
+            else "Not applicable"
+        ),
 
-        "streaming_hours_per_day": coerce_float(form.get("streaming_hours_per_day"), 0),
-        "ai_usage": form.get("ai_usage", "Never"),
-        "video_call_hours_per_week": coerce_float(form.get("video_call_hours_per_week"), 0),
+        "dairy_frequency": form.get(
+            "dairy_frequency",
+            "Weekly"
+        ),
 
-        "new_clothing_frequency": form.get("new_clothing_frequency", "Sometimes"),
-        "new_electronics_frequency": form.get("new_electronics_frequency", "Sometimes"),
+        "food_waste": form.get(
+            "food_waste",
+            "Some"
+        ),
+
+        "recycles": (
+            form.get("recycles", "no") == "yes"
+        ),
+
+        "composts": (
+            form.get("composts", "no") == "yes"
+        ),
+
+        "trash_bags_per_week": coerce_float(
+            form.get("trash_bags_per_week"),
+            0
+        ),
+
+        "streaming_hours_per_day": coerce_float(
+            form.get("streaming_hours_per_day"),
+            0
+        ),
+
+        "ai_usage": form.get(
+            "ai_usage",
+            "Never"
+        ),
+
+        "video_call_hours_per_week": coerce_float(
+            form.get("video_call_hours_per_week"),
+            0
+        ),
+
+        "new_clothing_frequency": form.get(
+            "new_clothing_frequency",
+            "Sometimes"
+        ),
+
+        "new_electronics_frequency": form.get(
+            "new_electronics_frequency",
+            "Sometimes"
+        ),
     }
 
 

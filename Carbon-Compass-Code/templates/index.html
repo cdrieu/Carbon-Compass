@@ -1,17 +1,60 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
     <title>Carbon Compass</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cedarville+Cursive&family=Cormorant+Garamond:wght@500;600;700&family=Instrument+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+
 </head>
 
-<body>
-    <main class="hero">
-        <h1>Carbon Compass</h1>
-        <p>Leading the way to change, one step at a time.</p>
-        <a class="button" href="{{ url_for('quiz') }}">Calculate Your Footprint</a>
-    </main>
+<body class="landing-page">
+
+<main class="landing-main">
+
+    <!-- Replace this image later with your hand-drawn compass -->
+    <img
+        src="{{ url_for('static', filename='images/compass.png') }}"
+        alt="Carbon Compass logo"
+        class="landing-logo-illustration"
+    >
+
+    <h1 class="landing-logo">
+        Carbon Compass
+    </h1>
+
+    <p class="landing-tagline">
+       Leading the way to change, one step at a time.
+    </p>
+
+    <a
+        href="{{ url_for('quiz') }}"
+        class="primary-button landing-button"
+    >
+        Calculate Your Footprint
+    </a>
+
+</main>
+
 </body>
+
 </html>
