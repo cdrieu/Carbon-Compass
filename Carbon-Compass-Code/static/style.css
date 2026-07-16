@@ -656,9 +656,7 @@ select{
 
 
 .checkbox-list label{
-
     margin:0;
-
 }
 
 
@@ -696,16 +694,6 @@ select{
     transition:.18s;
 
     color:var(--text);
-
-}
-
-
-
-/* checked */
-
-.checkbox-list input:checked + span{
-
-    color:white;
 
 }
 
@@ -2000,4 +1988,48 @@ input:focus-visible {
         font-size: 0.98rem;
         line-height: 1.7;
     }
+}
+
+/* Final selected-state styling for home-system pills */
+
+.checkbox-list label {
+
+    position: relative;
+
+    overflow: hidden;
+
+}
+
+.checkbox-list input {
+
+    position: absolute;
+
+    opacity: 0;
+
+    pointer-events: none;
+
+}
+
+.checkbox-list label:has(input:checked) {
+
+    background: var(--sage-light);
+
+    border-color: var(--sage);
+
+    box-shadow: 0 6px 16px rgba(101, 76, 79, 0.08);
+
+}
+
+.checkbox-list label:has(input:checked) span {
+
+    color: var(--plum);
+
+    font-weight: 600;
+
+}
+
+.checkbox-list label:not(:has(input:checked)) span {
+
+    color: var(--text);
+
 }

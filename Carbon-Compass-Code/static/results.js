@@ -48,12 +48,13 @@ function initializeFootprintChart() {
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            devicePixelRatio: Math.min(window.devicePixelRatio || 1, 2),
+            resizeDelay: 150,
             cutout: "56%",
-
             animation: {
                 duration: 850,
                 easing: "easeOutQuart"
-            },
+    },
 
             plugins: {
                 legend: {
