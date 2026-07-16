@@ -1120,40 +1120,28 @@ input[type=range]::-moz-range-thumb{
 
 /* palette */
 
-.legend-color-housing{
-
-    background:#B8C3A5;
-
+.legend-color-housing {
+    background: #C0CAAD;
 }
 
-.legend-color-transportation{
-
-    background:#B26E63;
-
+.legend-color-transportation {
+    background: #B26E63;
 }
 
-.legend-color-food{
-
-    background:#D5C49A;
-
+.legend-color-food {
+    background: #CEC075;
 }
 
-.legend-color-waste{
-
-    background:#9FAF91;
-
+.legend-color-waste {
+    background: #9DA9A0;
 }
 
-.legend-color-digital{
-
-    background:#B9CBD5;
-
+.legend-color-digital {
+    background: #BAD7F2;
 }
 
-.legend-color-shopping{
-
-    background:#DAB7BC;
-
+.legend-color-shopping {
+    background: #F2BAC9;
 }
 
 

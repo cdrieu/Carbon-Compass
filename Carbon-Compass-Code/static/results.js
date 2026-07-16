@@ -27,12 +27,12 @@ function initializeFootprintChart() {
                     data: chartData.values,
 
                     backgroundColor: [
-                        "#C0CAAD",
-                        "#9DA9A0",
-                        "#B26E63",
-                        "#CEC075",
-                        "#BAD7F2",
-                        "#F2BAC9"
+                        "#C0CAAD", // Housing — sage
+                        "#B26E63", // Transportation — terracotta
+                        "#CEC075", // Food — golden sand
+                        "#9DA9A0", // Waste — ash grey
+                        "#BAD7F2", // Digital — pale blue
+                        "#F2BAC9"  // Shopping — soft pink
                     ],
 
                     borderColor: "#FAF7EF",

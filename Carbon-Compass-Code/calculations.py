@@ -20,32 +20,94 @@ from data import (
 
 
 def calculate_housing(answers):
+
     household_size = max(answers["household_size"], 1)
 
     if answers["home_type"] == "Dormitory":
+
         return DORM_EMISSIONS_KG_PER_STUDENT_YEAR
 
     home_energy_mmbtu = HOME_TYPE_ENERGY_MMBTU[answers["home_type"]]
+
     size_factor = HOME_SIZE_FACTORS[answers["home_size"]]
+
     total_mmbtu = home_energy_mmbtu * size_factor
 
     systems = answers["home_systems"]
-    housing_emissions = 0
+
+    electricity_emissions = 0
+
+    heating_emissions = 0
+
+    air_conditioning_emissions = 0
 
     if "Electricity" in systems:
+
         electricity_kwh = total_mmbtu * 293.071 * 0.50
-        housing_emissions += electricity_kwh * HOUSING_FACTORS["electricity_kg_co2e_per_kwh"]
+
+        electricity_emissions = (
+
+            electricity_kwh
+
+            * HOUSING_FACTORS["electricity_kg_co2e_per_kwh"]
+
+        )
 
     if "Heating" in systems:
+
         heating_mmbtu = total_mmbtu * 0.35
+
         heating_cubic_feet = heating_mmbtu * 970
-        housing_emissions += heating_cubic_feet * HOUSING_FACTORS["heating_kg_co2_per_cubic_foot_natural_gas"]
+
+        heating_emissions = (
+
+            heating_cubic_feet
+
+            * HOUSING_FACTORS[
+
+                "heating_kg_co2_per_cubic_foot_natural_gas"
+
+            ]
+
+        )
 
     if "Air conditioning" in systems:
-        ac_kwh = total_mmbtu * 293.071 * 0.15
-        housing_emissions += ac_kwh * HOUSING_FACTORS["air_conditioning_kg_co2e_per_kwh"]
 
-    return housing_emissions / household_size
+        ac_kwh = total_mmbtu * 293.071 * 0.15
+
+        air_conditioning_emissions = (
+
+            ac_kwh
+
+            * HOUSING_FACTORS[
+
+                "air_conditioning_kg_co2e_per_kwh"
+
+            ]
+
+        )
+
+    grid_electricity_emissions = (
+
+        electricity_emissions
+
+        + air_conditioning_emissions
+
+    )
+
+    if "Solar panels" in systems:
+
+        solar_reduction = min(
+            HOUSING_FACTORS["solar_panel_reduction_kg_per_household_year"],
+            grid_electricity_emissions,
+        )
+        grid_electricity_emissions -= solar_reduction
+    housing_emissions = (
+        grid_electricity_emissions
+        + heating_emissions
+    )
+
+    return max(housing_emissions / household_size, 0)
 
 
 def calculate_transportation(answers):

@@ -22,7 +22,8 @@ HOME_SIZE_FACTORS = {
 HOUSING_FACTORS = {
     "electricity_kg_co2e_per_kwh": 0.350,
     "heating_kg_co2_per_cubic_foot_natural_gas": 0.055,
-    "air_conditioning_kg_co2e_per_kwh": 0.350
+    "air_conditioning_kg_co2e_per_kwh": 0.350,
+    "solar_panel_reduction_kg_per_household_year": 1200
 }
 
 VEHICLE_FACTORS_KG_PER_MILE = {
